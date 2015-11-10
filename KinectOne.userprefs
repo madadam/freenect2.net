@@ -1,11 +1,11 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Main.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Device.cs">
     <Files>
-      <File FileName="Main.cs" Line="28" Column="28" />
-      <File FileName="Device.cs" Line="4" Column="4" />
-      <File FileName="../libfreenect/wrappers/csharp/src/lib/Kinect.cs" Line="4" Column="4" />
-      <File FileName="../libfreenect/wrappers/csharp/src/lib/KinectNative.cs" Line="88" Column="88" />
+      <File FileName="Main.cs" Line="33" Column="33" />
+      <File FileName="Device.cs" Line="17" Column="17" />
+      <File FileName="../aforge/Sources/Video.Kinect/KinectVideoCamera.cs" Line="26" Column="26" />
+      <File FileName="../aforge/Sources/Video.Kinect/KinectDepthCamera.cs" Line="30" Column="30" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
