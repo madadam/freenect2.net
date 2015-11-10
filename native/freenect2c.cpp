@@ -1,13 +1,13 @@
+// C wrapper for libfreenect2.
+
 #include <libfreenect2/libfreenect2.hpp>
 #include <libfreenect2/logger.h>
-
-using namespace libfreenect2;
 
 extern "C" {
 
 //------------------------------------------------------------------------------
 namespace {
-  class SilentLogger : public Logger {
+  class SilentLogger : public libfreenect2::Logger {
     void log(Logger::Level, const std::string&) override {}
   };
 
@@ -15,48 +15,50 @@ namespace {
 }
 
 //------------------------------------------------------------------------------
-typedef struct Freenect2 *KinectOneContext;
+typedef struct libfreenect2::Freenect2 *Freenect2Context;
 
-KinectOneContext kinectone_context_create() {
+Freenect2Context freenect2_context_create() {
   setGlobalLogger(&silent_logger);
-  return new Freenect2;
+  return new libfreenect2::Freenect2;
 }
 
-void kinectone_context_destroy(KinectOneContext context) {
+void freenect2_context_destroy(Freenect2Context context) {
   delete context;
 }
 
-int kinectone_context_get_device_count(KinectOneContext context) {
+int freenect2_context_get_device_count(Freenect2Context context) {
   return context->enumerateDevices();
 }
 
 //------------------------------------------------------------------------------
-typedef void (*KinectOneFrameCallback)(unsigned char* frame_data);
+typedef void (*Freenect2FrameCallback)(unsigned char* frame_data);
 
 namespace {
   class FrameListener : public libfreenect2::FrameListener {
   public:
-    bool onNewFrame(Frame::Type type, Frame* frame) override {
+    bool onNewFrame( libfreenect2::Frame::Type type
+                   , libfreenect2::Frame*      frame) override
+    {
       // If I understand it correctly, returning true here means we took
       // ownership of the frame, false we left it as responsiblity of freenect2.
-      if (callback && type != Frame::Ir) callback(frame->data);
+      if (callback && type != libfreenect2::Frame::Ir) callback(frame->data);
       return false;
     }
 
-    KinectOneFrameCallback callback = nullptr;
+    Freenect2FrameCallback callback = nullptr;
   };
 
   struct Device {
-    Freenect2Device* device;
+    libfreenect2::Freenect2Device* device;
     FrameListener color_listener;
     FrameListener depth_listener;
   };
 }
 
 
-typedef struct Device *KinectOneDevice;
+typedef struct Device *Freenect2Device;
 
-KinectOneDevice kinectone_device_create( KinectOneContext context
+Freenect2Device freenect2_device_create( Freenect2Context context
                                        , int              id)
 {
   // TODO: pipeline
@@ -72,27 +74,27 @@ KinectOneDevice kinectone_device_create( KinectOneContext context
   return result;
 }
 
-void kinectone_device_destroy(KinectOneDevice device) {
+void freenect2_device_destroy(Freenect2Device device) {
   delete device->device;
   delete device;
 }
 
-void kinectone_device_start(KinectOneDevice device) {
+void freenect2_device_start(Freenect2Device device) {
   device->device->start();
 }
 
-void kinectone_device_stop(KinectOneDevice device) {
+void freenect2_device_stop(Freenect2Device device) {
   device->device->stop();
 }
 
-void kinectone_device_set_color_frame_callback( KinectOneDevice        device
-                                              , KinectOneFrameCallback callback)
+void freenect2_device_set_color_frame_callback( Freenect2Device        device
+                                              , Freenect2FrameCallback callback)
 {
   device->color_listener.callback = callback;
 }
 
-void kinectone_device_set_depth_frame_callback( KinectOneDevice        device
-                                              , KinectOneFrameCallback callback)
+void freenect2_device_set_depth_frame_callback( Freenect2Device        device
+                                              , Freenect2FrameCallback callback)
 {
   device->depth_listener.callback = callback;
 }

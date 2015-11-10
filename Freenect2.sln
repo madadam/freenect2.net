@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KinectOne", "KinectOne.csproj", "{05E6B380-AA88-4FCE-B158-5F6287FD2701}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Freenect2", "Freenect2.csproj", "{05E6B380-AA88-4FCE-B158-5F6287FD2701}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,7 +15,7 @@ Global
 		{05E6B380-AA88-4FCE-B158-5F6287FD2701}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = KinectOne.csproj
+		StartupItem = Freenect2.csproj
 		Policies = $0
 		$0.TextStylePolicy = $1
 		$1.inheritsSet = null

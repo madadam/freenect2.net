@@ -42,10 +42,11 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="libkinectone.so">
+    <None Include="libfreenect2.so">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="libfreenect2.so">
+    <None Include="native\libfreenect2c.so">
+      <Link>libfreenect2c.so</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

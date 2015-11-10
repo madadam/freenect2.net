@@ -2,7 +2,7 @@
 using System.Windows.Forms;
 using System.Drawing;
 
-namespace KinectOne
+namespace Freenect2
 {
 	public class MainForm : Form
 	{
@@ -17,21 +17,21 @@ namespace KinectOne
 			colorBox = new PictureBox();
 			colorBox.Parent = this;
 			colorBox.SizeMode = PictureBoxSizeMode.AutoSize;
-			colorBox.Dock = DockStyle.Top;
+			colorBox.Dock = DockStyle.Left;
 
 			depthBox = new PictureBox();
 			depthBox.Parent = this;
 			depthBox.SizeMode = PictureBoxSizeMode.AutoSize;
-			depthBox.Dock = DockStyle.Top;
+			depthBox.Dock = DockStyle.Left;
 
             device = new Device(0);
             device.FrameReceived += (color, depth) => {
-                var colorCopy = new Bitmap(color, 400, 300);
-                // var depthCopy = ...
+                var colorCopy = new Bitmap(color, 500, 400);
+                var depthCopy = new Bitmap(depth, 500, 400);
 
                 Invoke(new Action(() => {
                     colorBox.Image = colorCopy;
-                    // depthBox.Image = depthCopy;
+                    depthBox.Image = depthCopy;
                 }));
             };
 
