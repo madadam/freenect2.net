@@ -1,0 +1,15 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Main.cs">
+    <Files>
+      <File FileName="Main.cs" Line="28" Column="28" />
+      <File FileName="Device.cs" Line="4" Column="4" />
+      <File FileName="../libfreenect/wrappers/csharp/src/lib/Kinect.cs" Line="4" Column="4" />
+      <File FileName="../libfreenect/wrappers/csharp/src/lib/KinectNative.cs" Line="88" Column="88" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
