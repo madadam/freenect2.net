@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Freenect2", "Freenect2.csproj", "{05E6B380-AA88-4FCE-B158-5F6287FD2701}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example", "Example\Example.csproj", "{99FCD441-647D-4E7C-B355-3FB1049CF574}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -13,6 +15,10 @@ Global
 		{05E6B380-AA88-4FCE-B158-5F6287FD2701}.Debug|x86.Build.0 = Debug|x86
 		{05E6B380-AA88-4FCE-B158-5F6287FD2701}.Release|x86.ActiveCfg = Release|x86
 		{05E6B380-AA88-4FCE-B158-5F6287FD2701}.Release|x86.Build.0 = Release|x86
+		{99FCD441-647D-4E7C-B355-3FB1049CF574}.Debug|x86.ActiveCfg = Debug|x86
+		{99FCD441-647D-4E7C-B355-3FB1049CF574}.Debug|x86.Build.0 = Debug|x86
+		{99FCD441-647D-4E7C-B355-3FB1049CF574}.Release|x86.ActiveCfg = Release|x86
+		{99FCD441-647D-4E7C-B355-3FB1049CF574}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = Freenect2.csproj
@@ -42,5 +48,6 @@ Global
 		$3.inheritsSet = VisualStudio
 		$3.inheritsScope = text/plain
 		$3.scope = text/plain
+		description = C# Wrapper for the freenect2 library
 	EndGlobalSection
 EndGlobal
