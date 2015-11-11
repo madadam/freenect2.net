@@ -4,6 +4,9 @@
 #include <mutex>
 #include <cstring>
 
+#include <iostream> // DEBUG
+#include <thread>
+
 #include <libfreenect2/libfreenect2.hpp>
 #include <libfreenect2/logger.h>
 #include <libfreenect2/registration.h>
@@ -17,6 +20,10 @@ namespace {
   };
 
   static SilentLogger silent_logger;
+
+  void debug(const char* stuff) {
+    std::cout << std::this_thread::get_id() << ": " << stuff << std::endl;
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -49,8 +56,14 @@ namespace {
     FrameListener()
       : undistorted_frame(DEPTH_WIDTH, DEPTH_HEIGHT, 4)
       , registered_frame (DEPTH_WIDTH, DEPTH_HEIGHT, 4)
-      , big_depth_frame  (COLOR_WIDTH, COLOR_HEIGHT, 4)
+      , big_depth_frame  (COLOR_WIDTH, COLOR_HEIGHT + 2, 4)
     {}
+
+    ~FrameListener() {
+      // SUPER EVIL HACK: This will leak memory, but without it this
+      // class crashes on destruction. No fucking idea why :(
+      // registered_frame.release();
+    }
 
     bool onNewFrame( libfreenect2::Frame::Type type
                    , libfreenect2::Frame*      frame) override
@@ -63,40 +76,45 @@ namespace {
       switch (type) {
         case libfreenect2::Frame::Color:
           color_frame.reset(frame);
-          update();
-          return true;
+          break;
         case libfreenect2::Frame::Depth:
           depth_frame.reset(frame);
-          update();
-          return true;
+          break;
+        default:
+          return false;
       }
 
-      return false;
-    }
-
-  private:
-    void update() {
       if (color_frame && depth_frame) {
-        if (registration) {
-          registration->apply( color_frame.get()
-                             , depth_frame.get()
-                             , &undistorted_frame
-                             , &registered_frame
-                             , true
-                             , &big_depth_frame);
-        }
+        registration->apply( color_frame.get()
+                           , depth_frame.get()
+                           , &undistorted_frame
+                           , &registered_frame
+                           , true
+                           , &big_depth_frame);
 
         if (color_buffer) copy_to_buffer(*color_frame,    color_buffer);
-        if (depth_buffer) copy_to_buffer(big_depth_frame, depth_buffer);
-        if (callback) callback();
+        if (depth_buffer) copy_to_buffer(big_depth_frame, depth_buffer, true);
 
         color_frame = nullptr;
         depth_frame = nullptr;
+
+        if (callback) callback();
       }
+
+      return true;
     }
 
-    void copy_to_buffer(const libfreenect2::Frame& src, unsigned char* dst) {
-      std::memcpy(dst, src.data, src.width * src.height * src.bytes_per_pixel);
+  private:
+
+    void copy_to_buffer( const libfreenect2::Frame& src
+                       , unsigned char*             dst
+                       , bool                       crop = false)
+    {
+      auto offset = crop ? src.width : 0;
+
+      std::memcpy( dst
+                 , src.data + offset
+                 , (src.width * src.height - 2 * offset) * src.bytes_per_pixel);
     }
 
     std::mutex                                  mutex;
@@ -128,6 +146,10 @@ namespace {
       device->setIrAndDepthFrameListener(&listener);
     }
 
+    ~Device() {
+      device = nullptr;
+    }
+
     void start() {
       device->start();
       listener.registration = std::make_unique<libfreenect2::Registration>(
@@ -140,14 +162,17 @@ namespace {
     }
 
     void set_frame_callback(Freenect2FrameCallback callback) {
+      std::lock_guard<std::mutex> lock(listener.mutex);
       listener.callback = callback;
     }
 
     void set_color_buffer(unsigned char* buffer) {
+      std::lock_guard<std::mutex> lock(listener.mutex);
       listener.color_buffer = buffer;
     }
 
     void set_depth_buffer(unsigned char* buffer) {
+      std::lock_guard<std::mutex> lock(listener.mutex);
       listener.depth_buffer = buffer;
     }
   };
