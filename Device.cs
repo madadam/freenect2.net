@@ -40,6 +40,8 @@ namespace Freenect2
                 throw new Exception("Could not create Kinect device");
             }
 
+            ++contextRefCount;
+
             frameCallback = new FrameCallback(HandleFrame);
             freenect2_device_set_frame_callback(handle, frameCallback);
 
@@ -57,6 +59,12 @@ namespace Freenect2
             if (handle != IntPtr.Zero) {
                 freenect2_device_destroy(handle);
                 handle = IntPtr.Zero;
+
+                --contextRefCount;
+
+                if (contextRefCount <= 0) {
+                    DestroyContext();
+                }
             }
 
             colorBufferHandle.Free();
@@ -80,6 +88,7 @@ namespace Freenect2
 
 		#region Native
         private static IntPtr context;
+        private static int contextRefCount;
 
         private static IntPtr Context
         {
@@ -90,6 +99,14 @@ namespace Freenect2
                 }
 
                 return context;
+            }
+        }
+
+        private static void DestroyContext()
+        {
+            if (context != IntPtr.Zero) {
+                freenect2_context_destroy(context);
+                context = IntPtr.Zero;
             }
         }
 
