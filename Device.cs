@@ -16,12 +16,6 @@ namespace Freenect2
         private IntPtr handle;
         private FrameCallback frameCallback;
 
-        private Int32[]  colorBuffer;
-        private GCHandle colorBufferHandle;
-
-        private Single[] depthBuffer;
-        private GCHandle depthBufferHandle;
-
 		public static int Count 
 		{
 			get { return freenect2_context_get_device_count(Context); }
@@ -30,7 +24,7 @@ namespace Freenect2
         public Size FrameSize { get { return new Size(COLOR_WIDTH, COLOR_HEIGHT); } }
         public float MaxDepth { get { return MAX_DEPTH; } }
 
-        public event Action<Int32[], Single[]> FrameReceived;
+        public event Action<IntPtr, IntPtr> FrameReceived;
 
 		public Device(int id)
 		{
@@ -44,14 +38,6 @@ namespace Freenect2
 
             frameCallback = new FrameCallback(HandleFrame);
             freenect2_device_set_frame_callback(handle, frameCallback);
-
-            colorBuffer = new Int32[COLOR_WIDTH * COLOR_HEIGHT];
-            colorBufferHandle = GCHandle.Alloc(colorBuffer, GCHandleType.Pinned);
-            freenect2_device_set_color_buffer(handle, colorBufferHandle.AddrOfPinnedObject());
-
-            depthBuffer = new Single[COLOR_WIDTH * COLOR_HEIGHT];
-            depthBufferHandle = GCHandle.Alloc(depthBuffer, GCHandleType.Pinned);
-            freenect2_device_set_depth_buffer(handle, depthBufferHandle.AddrOfPinnedObject());
 		}
 
         public void Dispose()
@@ -66,9 +52,6 @@ namespace Freenect2
                     DestroyContext();
                 }
             }
-
-            colorBufferHandle.Free();
-            depthBufferHandle.Free();
         }
 
         public void Start()
@@ -81,9 +64,9 @@ namespace Freenect2
             freenect2_device_stop(handle);
         }
 
-        private void HandleFrame() {
+        private void HandleFrame(IntPtr color, IntPtr depth) {
             if (FrameReceived == null) return;
-            FrameReceived(colorBuffer, depthBuffer);
+            FrameReceived(color, depth);
         }
 
 		#region Native
@@ -111,7 +94,7 @@ namespace Freenect2
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate void FrameCallback();
+        private delegate void FrameCallback(IntPtr color, IntPtr depth);
 
         [DllImport("freenect2c")] private static extern IntPtr freenect2_context_create();
         [DllImport("freenect2c")] private static extern void   freenect2_context_destroy(IntPtr context);

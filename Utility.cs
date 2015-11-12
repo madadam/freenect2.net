@@ -9,7 +9,7 @@ namespace Freenect2
     public static class Utility
     {
         // Copy the color frame data to a 32 bpp RGB bitmap.
-        public static Bitmap ColorFrameTo32bppRgb(Int32[] frame, Size size) 
+        public static Bitmap ColorFrameTo32bppRgb(IntPtr frame, Size size) 
         {
             var bitmap = new Bitmap(size.Width, size.Height, PixelFormat.Format32bppRgb);
 
@@ -17,7 +17,7 @@ namespace Freenect2
                 , ImageLockMode.WriteOnly, bitmap.PixelFormat);
     
             try {
-                Marshal.Copy(frame, 0, data.Scan0, data.Width * data.Height);
+                Copy(frame, data.Scan0, data.Width * data.Height * 4);
             } finally {
                 bitmap.UnlockBits(data);
             }
@@ -26,7 +26,7 @@ namespace Freenect2
         }
 
         // Copy the depth frame data to a 8 bit grayscale bitmap
-        public static Bitmap DepthFrameTo8bppGrayscale(Single[] frame, Size size, Single maxDepth) 
+        public static Bitmap DepthFrameTo8bppGrayscale(IntPtr frame, Size size, Single maxDepth) 
         {
             var bitmap = new Bitmap(size.Width, size.Height, PixelFormat.Format8bppIndexed);
             SetGrayscalePalette(bitmap);
@@ -37,10 +37,11 @@ namespace Freenect2
             try {
                 unsafe {
                     var n = size.Width * size.Height;
+                    var src = (float*) frame.ToPointer();
                     var dst = (byte*) data.Scan0.ToPointer();
 
                     for (var i = 0; i < n; ++i) {
-                        dst[i] = (byte) (255 * Math.Min(frame[i] / maxDepth, 1f));
+                        dst[i] = (byte) (255 * Math.Min(src[i] / maxDepth, 1f));
                     }
                 }
             } finally {
@@ -49,6 +50,10 @@ namespace Freenect2
 
             return bitmap;
         }
+
+        // Copy length bytes of data between two unmanaged pointers
+        [DllImport("freenect2c", EntryPoint="freenect2_memory_copy")]
+        public static extern void Copy(IntPtr src, IntPtr dst, int length);
 
         private static void SetGrayscalePalette(Bitmap bitmap)
         {

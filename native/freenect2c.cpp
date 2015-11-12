@@ -43,7 +43,7 @@ int freenect2_context_get_device_count(Freenect2Context context) {
 }
 
 //------------------------------------------------------------------------------
-typedef void (*Freenect2FrameCallback)();
+typedef void (*Freenect2FrameCallback)(unsigned char* color, unsigned char* depth);
 
 namespace {
   static const int COLOR_WIDTH  = 1920;
@@ -92,13 +92,18 @@ namespace {
                            , true
                            , &big_depth_frame);
 
-        if (color_buffer) copy_to_buffer(*color_frame,    color_buffer);
-        if (depth_buffer) copy_to_buffer(big_depth_frame, depth_buffer, true);
+        if (callback) {
+          // Need to offset the depth frame pointer, because it contains
+          // one additional row at the top and the bottom.
+          callback(
+              color_frame->data
+            , big_depth_frame.data
+              + (big_depth_frame.width * big_depth_frame.bytes_per_pixel)
+          );
+        }
 
         color_frame = nullptr;
         depth_frame = nullptr;
-
-        if (callback) callback();
       }
 
       return true;
@@ -129,9 +134,6 @@ namespace {
     std::unique_ptr<libfreenect2::Registration> registration;
 
     Freenect2FrameCallback                      callback = nullptr;
-    unsigned char*                              color_buffer = nullptr;
-    unsigned char*                              depth_buffer = nullptr;
-
     friend struct Device;
   };
 
@@ -165,16 +167,6 @@ namespace {
       std::lock_guard<std::mutex> lock(listener.mutex);
       listener.callback = callback;
     }
-
-    void set_color_buffer(unsigned char* buffer) {
-      std::lock_guard<std::mutex> lock(listener.mutex);
-      listener.color_buffer = buffer;
-    }
-
-    void set_depth_buffer(unsigned char* buffer) {
-      std::lock_guard<std::mutex> lock(listener.mutex);
-      listener.depth_buffer = buffer;
-    }
   };
 }
 
@@ -206,16 +198,11 @@ void freenect2_device_set_frame_callback( Freenect2Device        device
   device->set_frame_callback(callback);
 }
 
-void freenect2_device_set_color_buffer( Freenect2Device device
-                                      , unsigned char* buffer)
+void freenect2_memory_copy( unsigned char* src
+                          , unsigned char* dst
+                          , std::size_t size)
 {
-  device->set_color_buffer(buffer);
-}
-
-void freenect2_device_set_depth_buffer( Freenect2Device device
-                                      , unsigned char* buffer)
-{
-  device->set_depth_buffer(buffer);
+  std::memcpy(dst, src, size);
 }
 
 } // extern "C"
