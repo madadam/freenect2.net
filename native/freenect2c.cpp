@@ -11,6 +11,9 @@
 #include <libfreenect2/logger.h>
 #include <libfreenect2/registration.h>
 
+// DEBUG
+#include <libfreenect2/packet_pipeline.h>
+
 extern "C" {
 
 //------------------------------------------------------------------------------
@@ -170,13 +173,35 @@ namespace {
   };
 }
 
-
 typedef struct Device *Freenect2Device;
 
-Freenect2Device freenect2_device_create( Freenect2Context context
-                                       , int              id)
+enum Freenect2Pipeline : int {
+  FREENECT2_PIPELINE_DEFAULT = 0,
+  FREENECT2_PIPELINE_CPU     = 1,
+  FREENECT2_PIPELINE_OPENGL  = 2,
+  FREENECT2_PIPELINE_OPENCL  = 3
+};
+
+Freenect2Device freenect2_device_create( Freenect2Context  context
+                                       , int               id
+                                       , Freenect2Pipeline pipeline_type)
 {
-  auto device = context->openDevice(id);
+  libfreenect2::Freenect2Device* device = nullptr;
+
+  switch (pipeline_type) {
+    case FREENECT2_PIPELINE_CPU:
+      device = context->openDevice(id, new libfreenect2::CpuPacketPipeline);
+      break;
+    case FREENECT2_PIPELINE_OPENGL:
+      device = context->openDevice(id, new libfreenect2::OpenGLPacketPipeline);
+      break;
+    case FREENECT2_PIPELINE_OPENCL:
+      device = context->openDevice(id, new libfreenect2::OpenCLPacketPipeline);
+      break;
+    default:
+      device = context->openDevice(id);
+  }
+
   return device ? new Device(device) : nullptr;
 }
 

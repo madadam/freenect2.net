@@ -4,6 +4,14 @@ using System.Runtime.InteropServices;
 
 namespace Freenect2
 {
+    public enum PacketPipeline : int
+    {
+        Default = 0,
+        Cpu     = 1,
+        OpenGL  = 2,
+        OpenCL  = 3
+    }
+
 	public class Device : IDisposable
 	{
         private const int COLOR_WIDTH  = 1920;
@@ -26,9 +34,9 @@ namespace Freenect2
 
         public event Action<IntPtr, IntPtr> FrameReceived;
 
-		public Device(int id)
+		public Device(int id, PacketPipeline pipeline = PacketPipeline.Default)
 		{
-            handle = freenect2_device_create(Context, id);
+            handle = freenect2_device_create(Context, id, pipeline);
 
             if (handle == IntPtr.Zero) {
                 throw new Exception("Could not create Kinect device");
@@ -100,7 +108,7 @@ namespace Freenect2
         [DllImport("freenect2c")] private static extern void   freenect2_context_destroy(IntPtr context);
 
 		[DllImport("freenect2c")] private static extern int    freenect2_context_get_device_count(IntPtr context);
-        [DllImport("freenect2c")] private static extern IntPtr freenect2_device_create(IntPtr context, int id);
+        [DllImport("freenect2c")] private static extern IntPtr freenect2_device_create(IntPtr context, int id, PacketPipeline pipeline);
         [DllImport("freenect2c")] private static extern IntPtr freenect2_device_destroy(IntPtr device);
         [DllImport("freenect2c")] private static extern IntPtr freenect2_device_start(IntPtr device);
         [DllImport("freenect2c")] private static extern IntPtr freenect2_device_stop(IntPtr device);
