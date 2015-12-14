@@ -4,15 +4,14 @@
 #include <mutex>
 #include <cstring>
 
-#include <iostream> // DEBUG
-#include <thread>
+// DEBUG
+#include <iostream>
+#include <fstream>
 
 #include <libfreenect2/libfreenect2.hpp>
 #include <libfreenect2/logger.h>
-#include <libfreenect2/registration.h>
-
-// DEBUG
 #include <libfreenect2/packet_pipeline.h>
+#include <libfreenect2/registration.h>
 
 extern "C" {
 
@@ -24,16 +23,32 @@ namespace {
 
   static SilentLogger silent_logger;
 
-  void debug(const char* stuff) {
-    std::cout << std::this_thread::get_id() << ": " << stuff << std::endl;
-  }
+  // class FileLogger : public libfreenect2::Logger {
+  //   std::ofstream file;
+
+  //   public:
+
+  //   FileLogger(const char *filename)
+  //     : file(filename)
+  //   {
+  //     level_ = Info;
+  //   }
+
+  //   virtual void log(Level level, const std::string &message) {
+  //     file << "[" << libfreenect2::Logger::level2str(level) << "] " << message << std::endl;
+  //   }
+  // };
+
+  // static FileLogger file_logger("/tmp/libfreenect2c.log");
 }
 
 //------------------------------------------------------------------------------
 typedef struct libfreenect2::Freenect2 *Freenect2Context;
 
 Freenect2Context freenect2_context_create() {
-  // setGlobalLogger(&silent_logger);
+  setGlobalLogger(&silent_logger);
+  // setGlobalLogger(&file_logger);
+
   return new libfreenect2::Freenect2;
 }
 
