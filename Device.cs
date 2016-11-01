@@ -19,7 +19,7 @@ namespace Freenect2
         private const int COLOR_HEIGHT = 1080;
 
         private const int DEPTH_WIDTH  = 512;
-        private const int DEPTH_HEIGHT = 414;
+        private const int DEPTH_HEIGHT = 424;
         private const float MAX_DEPTH  = 4500;
 
         private IntPtr handle;

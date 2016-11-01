@@ -29,7 +29,6 @@ namespace Freenect2
         // Copy the depth frame data to a 8 bit grayscale bitmap
         public static Bitmap DepthFrameTo8bppGrayscale(IntPtr frame, Size size, Single maxDepth) 
         {
-            DateTime startTime, stopTime;
             var bitmap = new Bitmap(size.Width, size.Height, PixelFormat.Format8bppIndexed);
             SetGrayscalePalette(bitmap);
 
@@ -38,7 +37,6 @@ namespace Freenect2
 
             try {
                 unsafe {
-                    startTime = DateTime.Now;
                     var n = size.Width * size.Height;
                     var src = (float*) frame.ToPointer();
                     var dst = (byte*) data.Scan0.ToPointer();
@@ -47,16 +45,10 @@ namespace Freenect2
                         {
                             dst[i] = (byte) (255 * Math.Min(src[i] / maxDepth, 1f));
                         });
-                    //for (var i = 0; i < n; ++i) {
-                    //    dst[i] = (byte) (255 * Math.Min(src[i] / maxDepth, 1f));
-                    //}
-                    stopTime = DateTime.Now;
                 }
             } finally {
                 bitmap.UnlockBits(data);
             }
-            TimeSpan duration = stopTime - startTime;
-            Debug.WriteLine("{0} ms", duration.Milliseconds);
 
             return bitmap;
         }
