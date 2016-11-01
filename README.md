@@ -32,7 +32,7 @@ After cloning the repo _cd_ into the _freenect.net_ folder and follow these buil
 		cd ..
 
 3. Copy the _libfreenect2_ libraries into the base folder.
-   If you have done a make install of the _libfreenect2_ to the default ~/freenect2 folder, this would look like
+   If you have done a _make install_ of the _libfreenect2_ to the default ~/freenect2 folder, this would look like
    
 		cp ~/freenect2/lib/libfreenect2.so* . 
 		
@@ -40,6 +40,6 @@ After cloning the repo _cd_ into the _freenect.net_ folder and follow these buil
     	
 		monodevelop Freenect2.sln
 		
-5. Check the target framework of the two solution subproject to match your currently installed .NET version.
+5. Check the target framework of the two solution subprojects to match your currently installed .NET version.
 
 6. Press F5
