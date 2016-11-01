@@ -2,7 +2,8 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
-
+using System.Diagnostics;
+using System.Threading.Tasks;
 namespace Freenect2
 {
     // Utilities for wirking with color and depth frames.
@@ -28,6 +29,7 @@ namespace Freenect2
         // Copy the depth frame data to a 8 bit grayscale bitmap
         public static Bitmap DepthFrameTo8bppGrayscale(IntPtr frame, Size size, Single maxDepth) 
         {
+            DateTime startTime, stopTime;
             var bitmap = new Bitmap(size.Width, size.Height, PixelFormat.Format8bppIndexed);
             SetGrayscalePalette(bitmap);
 
@@ -36,17 +38,25 @@ namespace Freenect2
 
             try {
                 unsafe {
+                    startTime = DateTime.Now;
                     var n = size.Width * size.Height;
                     var src = (float*) frame.ToPointer();
                     var dst = (byte*) data.Scan0.ToPointer();
 
-                    for (var i = 0; i < n; ++i) {
-                        dst[i] = (byte) (255 * Math.Min(src[i] / maxDepth, 1f));
-                    }
+                    Parallel.For(0, n, i =>
+                        {
+                            dst[i] = (byte) (255 * Math.Min(src[i] / maxDepth, 1f));
+                        });
+                    //for (var i = 0; i < n; ++i) {
+                    //    dst[i] = (byte) (255 * Math.Min(src[i] / maxDepth, 1f));
+                    //}
+                    stopTime = DateTime.Now;
                 }
             } finally {
                 bitmap.UnlockBits(data);
             }
+            TimeSpan duration = stopTime - startTime;
+            Debug.WriteLine("{0} ms", duration.Milliseconds);
 
             return bitmap;
         }
@@ -60,7 +70,7 @@ namespace Freenect2
             var cp = bitmap.Palette;
 
             for (var i = 0; i < 256; i++) {
-                cp.Entries[i] = Color.FromArgb(i, i, i);
+                cp.Entries[i] = Color.FromArgb(i*12%256, i, i*8%256);
             }
 
             bitmap.Palette = cp;
