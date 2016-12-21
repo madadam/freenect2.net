@@ -89,7 +89,7 @@ namespace Freenect2
             get
             {
                 if (context == IntPtr.Zero) {
-                    context = freenect2_context_create();
+                    context = freenect2_context_create();   // if you get a dll not found exception here, you probably forgot to set the libfreenect2 environment variables. try "source setenv.sh" in the bash and then reopen this solution with "monodevelop Freenect2.sln"
                 }
 
                 return context;

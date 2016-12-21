@@ -3,3 +3,4 @@ obj
 bin
 native/*.so
 *.userprefs
+libfreenect2*.so*
