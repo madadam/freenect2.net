@@ -61,7 +61,7 @@ int freenect2_context_get_device_count(Freenect2Context context) {
 }
 
 //------------------------------------------------------------------------------
-typedef void (*Freenect2FrameCallback)(unsigned char* color, unsigned char* depth);
+typedef void (*Freenect2FrameCallback)(unsigned char* color, unsigned char* depth, unsigned char* bigdepth);
 
 namespace {
   static const int COLOR_WIDTH  = 1920;
@@ -114,8 +114,9 @@ namespace {
           // Need to offset the depth frame pointer, because it contains
           // one additional row at the top and the bottom.
           callback(
-              color_frame->data
-            , big_depth_frame.data
+              color_frame->data,
+              depth_frame->data,
+              big_depth_frame.data
               + (big_depth_frame.width * big_depth_frame.bytes_per_pixel)
           );
         }
@@ -194,7 +195,8 @@ enum Freenect2Pipeline : int {
   FREENECT2_PIPELINE_DEFAULT = 0,
   FREENECT2_PIPELINE_CPU     = 1,
   FREENECT2_PIPELINE_OPENGL  = 2,
-  FREENECT2_PIPELINE_OPENCL  = 3
+  FREENECT2_PIPELINE_OPENCL  = 3,
+  FREENECT2_PIPELINE_CUDA    = 4
 };
 
 Freenect2Device freenect2_device_create( Freenect2Context  context
@@ -212,6 +214,9 @@ Freenect2Device freenect2_device_create( Freenect2Context  context
       break;
     case FREENECT2_PIPELINE_OPENCL:
       device = context->openDevice(id, new libfreenect2::OpenCLPacketPipeline);
+      break;
+    case FREENECT2_PIPELINE_CUDA:
+      device = context->openDevice(id, new libfreenect2::CudaPacketPipeline);
       break;
     default:
       device = context->openDevice(id);

@@ -2,7 +2,8 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
-
+using System.Diagnostics;
+using System.Threading.Tasks;
 namespace Freenect2
 {
     // Utilities for wirking with color and depth frames.
@@ -40,9 +41,10 @@ namespace Freenect2
                     var src = (float*) frame.ToPointer();
                     var dst = (byte*) data.Scan0.ToPointer();
 
-                    for (var i = 0; i < n; ++i) {
-                        dst[i] = (byte) (255 * Math.Min(src[i] / maxDepth, 1f));
-                    }
+                    Parallel.For(0, n, i =>
+                        {
+                            dst[i] = (byte) (255 * Math.Min(src[i] / maxDepth, 1f));
+                        });
                 }
             } finally {
                 bitmap.UnlockBits(data);
@@ -60,7 +62,7 @@ namespace Freenect2
             var cp = bitmap.Palette;
 
             for (var i = 0; i < 256; i++) {
-                cp.Entries[i] = Color.FromArgb(i, i, i);
+                cp.Entries[i] = Color.FromArgb(i*12%256, i, i*8%256);
             }
 
             bitmap.Palette = cp;

@@ -9,7 +9,8 @@ namespace Freenect2
         Default = 0,
         Cpu     = 1,
         OpenGL  = 2,
-        OpenCL  = 3
+        OpenCL  = 3,
+        Cuda    = 4
     }
 
 	public class Device : IDisposable
@@ -30,11 +31,13 @@ namespace Freenect2
 		}
 
         public Size FrameSize { get { return new Size(COLOR_WIDTH, COLOR_HEIGHT); } }
+        public Size ColorFrameSize { get { return new Size(COLOR_WIDTH, COLOR_HEIGHT); } }
+        public Size DepthFrameSize { get { return new Size(DEPTH_WIDTH, DEPTH_HEIGHT); } }
         public float MaxDepth { get { return MAX_DEPTH; } }
 
-        public event Action<IntPtr, IntPtr> FrameReceived;
+        public event Action<IntPtr, IntPtr, IntPtr> FrameReceived;
 
-		public Device(int id, PacketPipeline pipeline = PacketPipeline.Default)
+        public Device(int id, PacketPipeline pipeline = PacketPipeline.OpenCL)
 		{
             handle = freenect2_device_create(Context, id, pipeline);
 
@@ -72,9 +75,9 @@ namespace Freenect2
             freenect2_device_stop(handle);
         }
 
-        private void HandleFrame(IntPtr color, IntPtr depth) {
+        private void HandleFrame(IntPtr color, IntPtr depth, IntPtr bigDepth) {
             if (FrameReceived == null) return;
-            FrameReceived(color, depth);
+            FrameReceived(color, depth, bigDepth);
         }
 
 		#region Native
@@ -86,7 +89,7 @@ namespace Freenect2
             get
             {
                 if (context == IntPtr.Zero) {
-                    context = freenect2_context_create();
+                    context = freenect2_context_create();   // if you get a dll not found exception here, you probably forgot to set the libfreenect2 environment variables. try "source setenv.sh" in the bash and then reopen this solution with "monodevelop Freenect2.sln"
                 }
 
                 return context;
@@ -102,7 +105,7 @@ namespace Freenect2
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate void FrameCallback(IntPtr color, IntPtr depth);
+        private delegate void FrameCallback(IntPtr color, IntPtr depth, IntPtr bigDepth);
 
         [DllImport("freenect2c")] private static extern IntPtr freenect2_context_create();
         [DllImport("freenect2c")] private static extern void   freenect2_context_destroy(IntPtr context);

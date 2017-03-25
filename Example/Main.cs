@@ -16,27 +16,28 @@ public class MainForm : Form
 
 	public MainForm() 
     {
-		Text = "Freenect2.Net test";
-		Size = new Size(1100, 900);
+		Text = "Freenect2.Net Test";
 
-        var imageSize = new Size(500, 400);
+        device = new Device(0);
+        var depthImageSize = device.DepthFrameSize;
+        var colorImageSize = new Size(device.ColorFrameSize.Width * 2 / 3, device.ColorFrameSize.Height *2 / 3); // 2/3 rgb camera resolution
+        Size = colorImageSize;
+
+        var depthBox = new PictureBox();
+        depthBox.Size = depthImageSize;
+        depthBox.Location = new Point(colorImageSize.Width - depthImageSize.Width, 0); 
+        depthBox.SizeMode = PictureBoxSizeMode.StretchImage;
+        Controls.Add(depthBox);
 
 		var colorBox = new PictureBox();
-        colorBox.Size = imageSize;
+        colorBox.Size = colorImageSize;
         colorBox.Location = new Point(0, 0); 
         colorBox.SizeMode = PictureBoxSizeMode.StretchImage;
         Controls.Add(colorBox);
 
-		var depthBox = new PictureBox();
-        depthBox.Size = imageSize;
-        depthBox.Location = new Point(0, imageSize.Height); 
-        depthBox.SizeMode = PictureBoxSizeMode.StretchImage;
-        Controls.Add(depthBox);
-
-        device = new Device(0);
-        device.FrameReceived += (color, depth) => {
-            var colorImage = Utility.ColorFrameTo32bppRgb(color, device.FrameSize);
-            var depthImage = Utility.DepthFrameTo8bppGrayscale(depth, device.FrameSize, device.MaxDepth);
+        device.FrameReceived += (color, depth, bigDepth) => {
+            var colorImage = Utility.ColorFrameTo32bppRgb(color, device.ColorFrameSize);
+            var depthImage = Utility.DepthFrameTo8bppGrayscale(depth, device.DepthFrameSize, device.MaxDepth);
 
             // This is called from another thread, so we can't access control directly. Also can't use
             // Invoke, because it is blocking and can cause deadlock when device is disposed. 
